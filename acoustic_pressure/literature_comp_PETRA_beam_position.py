@@ -1,15 +1,17 @@
-# compute acoustic force whe the laser beam is perpendicular to the length
-# of the QTF
-# the goal is to take into acount the shape of the QTF (the phi function)
-# and reproduce figure 3 of [1] 
-##### REF :
-# [1] Petra, N., Zweck, J., Kosterev, A. A., Minkoff, S. E., & Thomazy, D. (2009). 
-# Theoretical analysis of a quartz-enhanced photoacoustic spectroscopy sensor. 
-# Applied Physics B: Lasers and Optics, 94(4), 673–680. 
-# https://doi.org/10.1007/s00340-009-3379-1
-# /!\ see also pdf and matlab file from her student
-##### VERSION
-# 2020-04-17 - First version
+'''compute acoustic force when the laser beam is perpendicular to the length
+of the QTF
+the goal is to take into acount the shape of the QTF (the phi function)
+and reproduce figure 3 of [1] 
+#### REF :
+[1] Petra, N., Zweck, J., Kosterev, A. A., Minkoff, S. E., & Thomazy, D. (2009). 
+Theoretical analysis of a quartz-enhanced photoacoustic spectroscopy sensor. 
+Applied Physics B: Lasers and Optics, 94(4), 673–680. 
+https://doi.org/10.1007/s00340-009-3379-1
+/! see also pdf and matlab file from her student
+#### VERSION
+2020-04-17 - First version
+2020-04-20 - update to take into acount the width of the laser
+'''
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -43,10 +45,17 @@ QTF = ct.Cantilever(material=Quartz,fluid=Air,dico={'name':'QTF_Petra',
             'freq':32.8e3,
             'Qvac':None})
 
-AcPress = ap.AcousticPressure(Air)
+AcPress = ap.AcousticPressure(fluid=Air,
+            dico={'freq_mod':32761,
+                'laser_power':61.7e-3,
+                'wavelength':1.53e-6,
+                'waist':100e-6,
+                'Rayleigh_length':None,
+                'alpha_eff':1.31e-2})
 
 # Laser position
 xL = 0.7*QTF.length
+yL = 0
 zL = QTF.gap/2
 
 # resonnator
@@ -63,11 +72,12 @@ def phi(x):
 def DeltaP(x,y):
     # return the difference of pressure 
     # beteween the top and back of the mechanicla resoantor
-    time = 0
-    r1 = np.sqrt((x-xL)**2+(zL)**2)
-    P1 = np.abs(AcPress.P(r1,time))
-    r2 = np.sqrt((x-xL)**2+(e+zL)**2)
-    P2 = np.abs(AcPress.P(r2,time))
+    time = 0  
+    b = x-xL
+    a = y-yL
+    c = zL
+    P1 = np.abs(AcPress.P(a,b,c,time))
+    P2 = np.abs(AcPress.P(a,b,c+e,time))
     return P1-P2
 
 def Force_density(x,y):

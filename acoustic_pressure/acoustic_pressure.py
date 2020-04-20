@@ -33,21 +33,34 @@ from fluid_material import fluid_material as fm
 
 class AcousticPressure():
     # define a class wich can return the acoustic pressure
-    def __init__(self,fluid):
+    def __init__(self,fluid,dico):
         self.fluid = fluid
-        # frequency
-        self.freq = 32761 #[Hz]        
+        # modualtion frequency
+        self.freq_mod = dico['freq_mod'] #[Hz]        
         # laser power
-        self.Pl = 61.7e-3 #[W]
+        self.Pl = dico['laser_power'] #[W]
         # laser wavelength
-        self.wavelength = 1.53e-6 # [m]
+        self.wavelength = dico['wavelength'] # [m]
         # laser waist (minimum value possible)
         # if we compare with [1] sigma = waist/2
-        self.waist = 2*self.wavelength/np.pi
+        if dico['waist'] is None:
+            self.waist = 2*self.wavelength/np.pi
+        else:
+            self.waist = dico['waist']
+        # laser Rayleigh length
+        if dico['Rayleigh_length'] is None:
+            self.Rayleigh = np.pi*self.waist**2/self.wavelength
+        else:
+            self.Rayleigh = dico['Rayleigh_length'] 
+        # effecrive losses
+        self.alpha_eff = dico['alpha_eff'] #[m-1]
+
+    def Change_waist(self,value):
+        # change the value for the waist
+        # and update Rayleigth length
+        self.waist = value
         # laser Rayleigh length
         self.Rayleigh = np.pi*self.waist**2/self.wavelength 
-        # effecrive losses
-        self.alpha_eff = 1.31e-2 #[m-1]
 
     def P(self,x,y,z,t):
         '''
@@ -64,7 +77,7 @@ class AcousticPressure():
         xR = self.Rayleigh
         wL = wL0*np.sqrt(1+x**2/xR**2)
         # laser modulation
-        omega = 2*np.pi*self.freq #[1/s]
+        omega = 2*np.pi*self.freq_mod #[1/s]
         # laser power
         Pl = self.Pl
         # air heat capacity ratio
@@ -93,7 +106,7 @@ class AcousticPressure():
         print('wavelength       = %f um'%(self.wavelength*1e6))
         print('Rayleigh length  = %f um'%(self.Rayleigh*1e6))
         print('waist            = %f um'%(self.waist*1e6))
-        print('modulation       = %f kHz'%(self.freq*1e-3))
+        print('modulation       = %f kHz'%(self.freq_mod*1e-3))
         print('GAS   :')
         print("losses           = %f cm-1"%(self.alpha_eff*1e-2))
 
