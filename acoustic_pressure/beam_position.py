@@ -123,7 +123,7 @@ Force = {'perp':{'xL':[],'yL':[],'zL':[]}
 nbr_points = 101
 
 ### xL variation 
-tab_xL = np.linspace(0, 1.2*Cant.length, nbr_points)
+tab_xL = np.linspace(0, 10*Cant.length, nbr_points)
 yL = 0
 for i in tab_xL:
     xL = i
@@ -144,7 +144,7 @@ xL_para_max = tab_xL[index]
 print('Force parallel is max for xL=%.2fL'%(xL_para_max/Cant.length))
 
 ### yL variation 
-tab_yL = np.linspace(-10*Cant.width, +10*Cant.width, nbr_points)
+tab_yL = np.linspace(-100*Cant.width, +100*Cant.width, nbr_points)
 for i in tab_yL:
     yL = i
     xL = xL_perp_max
@@ -197,7 +197,7 @@ donnees = {'x':tab_xL,
         'perp_zL':Force['perp']['zL'],
         }
 data = pandas.DataFrame(donnees)
-data.to_csv('beam_position - %s .csv'%(info_cant), sep=';', encoding='utf-8') 
+data.to_csv('beam_position - %s.csv'%(info_cant), sep=';', encoding='utf-8') 
 
 
 #################################################
