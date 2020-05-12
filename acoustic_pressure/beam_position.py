@@ -38,9 +38,9 @@ Air = fm.Fluid(name='air')
 Si110 = fm.Material(name='silicon_110')
 
 # Define cantilever
-e = 40e-6 # thickness [m]
-l =  100e-6 # width [m]
-freq = 10e3 # resonance frequency [Hz]
+e = 100e-6 # thickness [m]
+l =  500e-6 # width [m]
+freq = 20e3 # resonance frequency [Hz]
 Cant = ct.Cantilever(material=Si110,fluid=Air,dico={'name':'cantilever',
             'length':None,
             'width':l,
@@ -50,7 +50,7 @@ Cant = ct.Cantilever(material=Si110,fluid=Air,dico={'name':'cantilever',
             'Qvac':None})
 Cant.length_unkonw()
 print('Cantilever length is : %f mm'%(Cant.length*1e3))
-
+Cant.info()
 
 '''
 Axis definition :
@@ -123,7 +123,7 @@ Force = {'perp':{'xL':[],'yL':[],'zL':[]}
 nbr_points = 101
 
 ### xL variation 
-tab_xL = np.linspace(0, 10*Cant.length, nbr_points)
+tab_xL = np.linspace(0, 1.2*Cant.length, nbr_points)
 yL = 0
 for i in tab_xL:
     xL = i
@@ -144,7 +144,7 @@ xL_para_max = tab_xL[index]
 print('Force parallel is max for xL=%.2fL'%(xL_para_max/Cant.length))
 
 ### yL variation 
-tab_yL = np.linspace(-100*Cant.width, +100*Cant.width, nbr_points)
+tab_yL = np.linspace(-5*Cant.width, +5*Cant.width, nbr_points)
 for i in tab_yL:
     yL = i
     xL = xL_perp_max
@@ -219,7 +219,7 @@ ax1.tick_params(axis='both', which='major', labelsize=14)
 ax1.set_xlabel('Laser beam posotion on x-axis (x/length)', labelpad=5, fontsize=14)
 ax1.set_ylabel('Acoustic force (N)', labelpad=5, fontsize=14)
 # ax1.set_xlim([0,5])
-ax1.set_ylim([0,2.7e-13])
+# ax1.set_ylim([0,2.7e-13])
 ax1.legend(loc=0, prop={'size': 10})
 
 ax2 = plt.subplot2grid(gridsize, (0, 1), colspan=1, rowspan=1)
@@ -232,7 +232,7 @@ ax2.tick_params(axis='both', which='major', labelsize=14)
 ax2.set_xlabel('Laser beam posotion on y-axis (x/width)', labelpad=5, fontsize=14)
 ax2.set_ylabel('Acoustic force (N)', labelpad=5, fontsize=14)
 # ax2.set_xlim([0,5])
-ax2.set_ylim([0,2.7e-13])
+# ax2.set_ylim([0,2.7e-13])
 ax2.legend(loc=0, prop={'size': 10})
 
 ax3 = plt.subplot2grid(gridsize, (1, 0), colspan=1, rowspan=1)
@@ -244,7 +244,7 @@ ax3.grid(b=True, which='major', color='#D3D3D3', linestyle='-')
 ax3.tick_params(axis='both', which='major', labelsize=14)
 ax3.set_xlabel('Laser beam posotion on z-axis (mm)', labelpad=5, fontsize=14)
 ax3.set_ylabel('Acoustic force (N)', labelpad=5, fontsize=14)
-ax2.set_ylim([0,2.7e-13])
+# ax2.set_ylim([0,2.7e-13])
 ax3.legend(loc=0, prop={'size': 10})
 
 fig.savefig('beam_position - %s .png'%(info_cant), dpi=fig.dpi*2)
