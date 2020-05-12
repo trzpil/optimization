@@ -106,6 +106,8 @@ class Material():
         print('MATERIAL '+ self.name+' : ')
         print('density = %g kg/m3'
             %(self.density))
+        print('Young’s modulus = %g GPa'
+            %(self.young*1e-9))
 
 if __name__ == "__main__":
     Air = Fluid(name='air')
