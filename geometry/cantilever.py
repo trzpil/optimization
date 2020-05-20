@@ -70,7 +70,7 @@ class Cantilever(be.Beam):
         mu = 1.875 #for the first harmonic
         l = (E*I/rho/w/t*(mu**2/2/np.pi/freq)**2)**(1./4)
         self.length = l
-        self.mass = self.mass()
+        self.mass = self.masse()
         self.mass_eff = self.effective_mass()   
 
     def phi(self,x,mode=1):

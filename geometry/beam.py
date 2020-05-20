@@ -17,7 +17,7 @@ class Beam():
         self.thickness = dico['thickness'] # thickness in [m]
         self.gap = dico['gap'] # gap of air for the squeeze film
         if (self.length is not None) and (self.thickness is not None)  and (self.width is not None):
-            self.mass = self.mass()
+            self.mass = self.masse()
         ## RESONANCE
         self.freq = dico['freq'] # [Hz]
         self.Qvac = dico['Qvac'] # quality factor under vacuum
@@ -37,6 +37,6 @@ class Beam():
         if self.mass is not None:
             print('mass = %g ug'%(self.mass*1e9))
 
-    def mass(self):
+    def masse(self):
         m = self.density*self.length*self.width*self.thickness #[kg]
         return m 
