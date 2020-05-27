@@ -25,6 +25,7 @@ class GasSpecie():
         # for a optical path of 1m
         length = 100 # [cm]
         self.absorption = 1-np.exp(-self.absorption_coeff*length)
+        self.absorbance = self.absorption_coeff*length
 
     def comp_absorption_coeff(self):
         # compute the absorption coefficient [2]
@@ -63,6 +64,8 @@ class GasSpecie():
             %(self.absorption_coeff))
         print('absorption (on 1m) = {:.0%} '
             .format(self.absorption))
+        print('absorbance (on 1m) = {:.0%} '
+            .format(self.absorbance))
 
 class Fluid():
     def __init__(self,name=None):
