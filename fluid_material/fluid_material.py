@@ -2,8 +2,67 @@
 # 2020-03-06 - First version
 # 2020-03-20 - Add Water
 # 2020-04-09 - Add for Air speed of sound and gamma
+# 2020-05-27 - Add gas species
 
 import numpy as np
+
+class GasSpecie():
+    # contain the physical parameters of the target gas
+    def __init__(self,dico):
+        self.name = dico['name']
+        self.wavelength = dico['abs wavelength [m]']
+        self.pressure = dico['pressure [Pa]']
+        self.temperature = dico['temperature [K]']
+        self.cross_section = dico['cross section [cm2/molecule]']
+        self.relaxation_time = dico['relaxation time [s]']
+        self.concentration = dico['concentration [Nbr_mlc/Nbr_tot]']
+        self.comp_gas_density()
+        self.comp_absorption_coeff()
+        self.comp_absorption()
+
+    def comp_absorption(self):
+        # compute absorption in % 
+        # for a optical path of 1m
+        length = 100 # [cm]
+        self.absorption = 1-np.exp(-self.absorption_coeff*length)
+
+    def comp_absorption_coeff(self):
+        # compute the absorption coefficient [2]
+        self.absorption_coeff =  self.cross_section * self.gas_densty 
+
+    def comp_gas_density(self):
+        # see ref [2] Loschmidt number
+        N_L = 2.479e19 # [mol/cm3/atm]
+        # compute N_tot the total density of molecules 
+        # at temperature T and pressure P
+        P = self.pressure/101325 # in atmosphere
+        T = self.temperature
+        N_tot = N_L*296/T*P
+        # compute N the gas density in [mol/cm3]
+        C = self.concentration
+        N = C*N_tot
+        self.gas_densty = N
+
+    def info(self):
+        print('GAS SPECIE '+ self.name+' : ')
+        print('absorption wavelength = %f um'
+            %(self.wavelength*1e6))
+        print('pressure = %g Pa'
+            %(self.pressure))
+        print('temperature = %.1f K'
+            %(self.temperature))
+        print('cross section = %g cm2/molecule'
+            %(self.cross_section))
+        print('relaxation time = %f us'
+            %(self.relaxation_time*1e6))
+        print('concentration = %g ppmv'
+            %(self.concentration*1e6))
+        print('gas density = %g mol/cm3'
+            %(self.gas_densty))
+        print('absorption coefficient = %g cm-1'
+            %(self.absorption_coeff))
+        print('absorption (on 1m) = {:.0%} '
+            .format(self.absorption))
 
 class Fluid():
     def __init__(self,name=None):
@@ -112,9 +171,21 @@ class Material():
 if __name__ == "__main__":
     Air = Fluid(name='air')
     Air.info()
+
+    Ch4 = GasSpecie(dico={
+        'name':'CH4',
+        'abs wavelength [m]':1.65e-6,
+        'pressure [Pa]':Air.pressure,
+        'temperature [K]':Air.temperature,
+        'cross section [cm2/molecule]':1.55e-20,
+        'relaxation time [s]':15e-6,
+        'concentration [Nbr_mlc/Nbr_tot]':0.01
+        })
+    Ch4.info()
+
     Si = Material(name='silicon_100')
     Si.info()
-    print(Si.poisson)
+    # print(Si.poisson)
 
 
 #################################################
@@ -123,10 +194,10 @@ if __name__ == "__main__":
 
 # [1]
 # Hopcroft, M. A., Nix, W. D., & Kenny, T. W. (2010). 
-# What is the Young’s modulus of silicon? 
+# "What is the Young’s modulus of silicon? "
 # Journal of Microelectromechanical Systems, 19(2), 229–238. 
 # https://doi.org/10.1109/JMEMS.2009.2039697  
-
-
-
-
+# [2]
+# Jean-Philippe BESSON
+# "photoacoustic spectroscopy for multi-gas sensing using near infrared lasers"
+# Thesis
