@@ -23,13 +23,13 @@ class GasSpecie():
     def comp_absorption(self):
         # compute absorption in % 
         # for a optical path of 1m
-        length = 100 # [cm]
+        length = 1 # [m]
         self.absorption = 1-np.exp(-self.absorption_coeff*length)
         self.absorbance = self.absorption_coeff*length
 
     def comp_absorption_coeff(self):
         # compute the absorption coefficient [2]
-        self.absorption_coeff =  self.cross_section * self.gas_densty 
+        self.absorption_coeff =  self.cross_section * self.gas_densty * 1e2
 
     def comp_gas_density(self):
         # see ref [2] Loschmidt number
@@ -60,12 +60,13 @@ class GasSpecie():
             %(self.concentration*1e6))
         print('gas density = %g mol/cm3'
             %(self.gas_densty))
-        print('absorption coefficient = %g cm-1'
+        print('absorption coefficient = %g m-1'
             %(self.absorption_coeff))
         print('absorption (on 1m) = {:.0%} '
             .format(self.absorption))
         print('absorbance (on 1m) = {:.0%} '
             .format(self.absorbance))
+        print('\n')
 
 class Fluid():
     def __init__(self,name=None):
@@ -121,6 +122,7 @@ class Fluid():
             print('air heat capacity ratio : ',self.Gamma)
         if hasattr(self, 'speed_of_sound'): 
             print('speed of sound : %f m/s'%self.speed_of_sound)
+        print('\n')
 
 class Material():
     def __init__(self,name=None):
@@ -137,7 +139,6 @@ class Material():
         if self.name in 'diamond':
             self.material_is_diamond()
         
-
     def material_is_diamond(self):
         self.density = 3530 # [kg/m3]
 
@@ -170,6 +171,8 @@ class Material():
             %(self.density))
         print('Young’s modulus = %g GPa'
             %(self.young*1e-9))
+        print('\n')
+
 
 if __name__ == "__main__":
     Air = Fluid(name='air')
