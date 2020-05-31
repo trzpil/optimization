@@ -110,7 +110,8 @@ class AcousticPressure():
         print('wavelength       = %f um'%(self.wavelength*1e6))
         print('Rayleigh length  = %f um'%(self.Rayleigh*1e6))
         print('waist            = %f um'%(self.waist*1e6))
-        print('modulation       = %f kHz'%(self.freq_mod*1e-3))
+        if self.freq_mod is not None:
+            print('modulation       = %f kHz'%(self.freq_mod*1e-3))
         print('GAS   :')
         print("losses           = %f cm-1"%(self.alpha_eff*1e-2))
 
