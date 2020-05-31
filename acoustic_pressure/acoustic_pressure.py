@@ -84,6 +84,7 @@ class AcousticPressure():
         # air heat capacity ratio
         Gamma = self.fluid.Gamma
         # effecrive losses the 0.7 come from the result obtain for Keff in [1]
+        # /! k_eff is divide by 2 in W
         k_eff = self.alpha_eff*0.7
         # relaxation time [s]
         tau = self.gas.relaxation_time
