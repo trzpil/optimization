@@ -137,14 +137,7 @@ ax1.contour(cs1, colors='k')
 ax1.set_title(r'viscous quality factor with $\omega$ = %.1f kHz'%(Freq*1e-3))
 ax1.set_ylabel('width (um)', labelpad=0)
 ax1.set_xlabel('thickness (um)', labelpad=0)
-# ax1.grid(c='k', ls='-', alpha=0.3)
-# ax1.set_xscale('log')
-# ax1.set_yscale('log')
-# ax1.tick_params(axis='both', which='major', labelsize=20)
-# ax1.tick_params(axis='both', which='minor', labelsize=18)
 
-#plt.colorbar(cs1, ax=ax1)
-# increase color bat font size
 cb = plt.colorbar(cs1, ax=ax1) # grab the Colorbar instance
 for t in cb.ax.get_yticklabels():
      t.set_fontsize(18)
