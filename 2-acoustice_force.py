@@ -80,7 +80,7 @@ zL = 150e-6 # [m]
 # Acoustic pressure with values from [1]
 AcPress = ap.AcousticPressure(fluid=Air,target_gas=Ch4,
         laser={'freq_mod':Cant.freq,
-            'laser_power':6e-3,
+            'laser_power':10e-3,
             'wavelength':1.65e-6,
             'waist':100e-6,
             'Rayleigh_length':None})
@@ -136,14 +136,10 @@ for i in range(0,np.size(width_grid,0)):
         data_save['thickness [m]'].append(thickness)
         data_save['force [N]'].append(force)
 
-
-
 end = time.time()
 print('TIMER :')
-info_time = 'exec_time=%.0fs'%((end-start))
-print('exec_time=%.0fs'%((end-start))) 
-
-
+info_time = 'exec_time=%.0fs =%.0fmin'%((end-start),(end-start)/60)
+print(info_time) 
 
 
 #################################################

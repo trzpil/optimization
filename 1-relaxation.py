@@ -32,7 +32,7 @@ Ch4.info()
 
 AcPress = ap.AcousticPressure(fluid=Air,target_gas=Ch4,
         laser={'freq_mod':None,
-            'laser_power':6e-3,
+            'laser_power':10e-3,
             'wavelength':1.65e-6,
             'waist':100e-6,
             'Rayleigh_length':None})
