@@ -134,7 +134,7 @@ fig, _ = plt.subplots()
 ax1 = plt.subplot2grid(gridsize, (0, 0), colspan=1, rowspan=1)
 cs1 = ax1.contourf(T*1e6, W*1e6, data['Qvis_sq'], cmap=cmap, levels = nbr_lvl)
 ax1.contour(cs1, colors='k')
-ax1.set_title(r'viscous quality factor with f=%.1f kHz'%(Freq*1e-3))
+ax1.set_title(r'Q$_{viscous}$ for f=%.1f kHz'%(Freq*1e-3))
 ax1.set_ylabel('width (um)', labelpad=0)
 ax1.set_xlabel('thickness (um)', labelpad=0)
 

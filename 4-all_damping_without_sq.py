@@ -27,7 +27,7 @@ start = time.time()
 Air = fm.Fluid(name='air')
 Si110 = fm.Material(name='silicon_100')
 
-nbr_points = 300
+nbr_points = 200
 
 Width = np.linspace(10e-6,10e-3,nbr_points) #[m]
 Thickness = np.linspace(10e-6,10e-4,nbr_points) #[m]
@@ -136,7 +136,7 @@ fig, _ = plt.subplots()
 ax1 = plt.subplot2grid(gridsize, (0, 0), colspan=1, rowspan=1)
 cs1 = ax1.contourf(T*1e6, W*1e6, data['Qtot'], cmap=cmap, levels = nbr_lvl)
 ax1.contour(cs1, colors='k')
-ax1.set_title(r'viscous quality factor with f=%.1f kHz'%(Freq*1e-3))
+ax1.set_title(r'Q$_{total}$ (without squeeze) for f=%.1f kHz'%(Freq*1e-3))
 ax1.set_ylabel('width (um)', labelpad=0)
 ax1.set_xlabel('thickness (um)', labelpad=0)
 ax1.set_xscale('log')
