@@ -115,7 +115,7 @@ def Force_density_parallel(x,y):
 
 start = time.time()
 
-nbr_points = 101
+nbr_points = 20
 width_list = np.linspace(5e-6,800e-6,nbr_points)
 thickness_list = np.linspace(5e-6,200e-6,nbr_points)
 width_grid, thickness_grid = np.meshgrid(width_list, thickness_list)
@@ -188,7 +188,7 @@ fig, _ = plt.subplots()
 ax1 = plt.subplot2grid(gridsize, (0, 0), colspan=1, rowspan=1)
 cs1 = ax1.contourf(thickness_grid*1e6, width_grid*1e6, data_plot*1e12, cmap=cmap, levels = nbr_lvl)
 ax1.contour(cs1, colors='k')
-ax1.set_title(r'acoustic force (pN) with $\omega$ = %.1f kHz'%(AcPress.freq_mod*1e-3))
+ax1.set_title(r'acoustic force (pN) with f=%.1f kHz'%(AcPress.freq_mod*1e-3))
 ax1.set_ylabel('width (um)', labelpad=0)
 ax1.set_xlabel('thickness (um)', labelpad=0)
 # ax1.grid(c='k', ls='-', alpha=0.3)
@@ -205,7 +205,7 @@ for t in cb.ax.get_yticklabels():
 
 
 # save figure
-fig.savefig(titre+'.png')
+fig.savefig(titre+'_{:.0f}kHz.png'.format(AcPress.freq_mod*1e-3))
 
 plt.show()
 
