@@ -25,7 +25,7 @@ from geometry import quartz_tuning_fork as qtf
 start = time.time()
 
 Air = fm.Fluid(name='air')
-Si110 = fm.Material(name='silicon_100')
+Si100 = fm.Material(name='silicon_100')
 
 Width = np.linspace(1e-6,60e-6,200) #[m]
 Thickness = np.linspace(1e-7,100e-6,200) #[m]
@@ -54,7 +54,7 @@ def Compute_cant(w,t):
     # w the width
     # t the thickness
     dico = {}
-    Cant = ct.Cantilever(material=Si110,fluid=Air,dico={'name':'cant',
+    Cant = ct.Cantilever(material=Si100,fluid=Air,dico={'name':'cant',
             'length':None,
             'width':w,
             'thickness':t,

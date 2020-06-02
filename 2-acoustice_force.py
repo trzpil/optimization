@@ -45,13 +45,13 @@ Ch4 = fm.GasSpecie(dico={
     'concentration [Nbr_mlc/Nbr_tot]':0.01})
 Ch4.info()
 
-Si110 = fm.Material(name='silicon_110')
+Si100 = fm.Material(name='silicon_100')
 
 # Define cantilever
 e = 100e-6 # thickness [m]
 l =  500e-6 # width [m]
 freq = 15e3 # resonance frequency [Hz]
-Cant = ct.Cantilever(material=Si110,fluid=Air,dico={'name':'cantilever',
+Cant = ct.Cantilever(material=Si100,fluid=Air,dico={'name':'cantilever',
             'length':None,
             'width':l,
             'thickness':e,
