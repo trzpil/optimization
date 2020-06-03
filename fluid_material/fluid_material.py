@@ -16,9 +16,7 @@ class GasSpecie():
         self.cross_section = dico['cross section [cm2/molecule]']
         self.relaxation_time = dico['relaxation time [s]']
         self.concentration = dico['concentration [Nbr_mlc/Nbr_tot]']
-        self.comp_gas_density()
-        self.comp_absorption_coeff()
-        self.comp_absorption()
+        self.update()
 
     def comp_absorption(self):
         # compute absorption in % 
@@ -67,6 +65,11 @@ class GasSpecie():
         print('absorbance (on 1m) = {:.0%} '
             .format(self.absorbance))
         print('\n')
+
+    def update(self):
+        self.comp_gas_density()
+        self.comp_absorption_coeff()
+        self.comp_absorption()
 
 class Fluid():
     def __init__(self,name=None):

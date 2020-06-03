@@ -40,15 +40,23 @@ AcPress.info()
 
 zL = 150e-6 # [m] distance between laser beam and resonator
 Frequecy = np.linspace(1e3,60e3,500) # frequency
-Pressure = [] # acoustic pressure 
+Pressure_10000ppmv = [] # acoustic pressure 
 for i in Frequecy:
     AcPress.freq_mod = i
     temp = AcPress.P(0,0,zL,0)
-    Pressure.append(temp)
+    Pressure_10000ppmv.append(temp)
+
+Ch4.concentration = 0.005
+Ch4.update()
+Pressure_5000ppmv = [] # acoustic pressure 
+for i in Frequecy:
+    AcPress.freq_mod = i
+    temp = AcPress.P(0,0,zL,0)
+    Pressure_5000ppmv.append(temp)
 
 ######## MAX ##########
-Pmax = max(np.abs(Pressure))
-index = np.where(np.abs(Pressure) == Pmax)
+Pmax = max(np.abs(Pressure_10000ppmv))
+index = np.where(np.abs(Pressure_10000ppmv) == Pmax)
 print('\n')
 print('Pressure is max for f = {} kHz'.format(Frequecy[index]*1e-3))
 
@@ -85,8 +93,15 @@ mpl.rcParams.update(params)
 gridsize = (1, 1)
 fig, _ = plt.subplots()
 
+number_color = 20
+cmap = plt.get_cmap('tab20c')
+colors = [cmap(i) for i in np.linspace(0, 1, number_color)]
+
 ax1 = plt.subplot2grid(gridsize, (0, 0), colspan=1, rowspan=1)
-ax1.plot(Frequecy*1e-3, np.abs(Pressure)*1e6,linewidth=2,label=r'1% of CH$_4$ in N$_2$')
+ax1.plot(Frequecy*1e-3, np.abs(Pressure_10000ppmv)*1e6, color=colors[0],
+  linewidth=2,label=r'1% of CH$_4$ in N$_2$')
+ax1.plot(Frequecy*1e-3, np.abs(Pressure_5000ppmv)*1e6, color=colors[2],
+  linewidth=2,label=r'0.5% of CH$_4$ in N$_2$')
 ax1.grid(b=True, which='major', color='#D3D3D3', linestyle='-')
 ax1.tick_params(axis='both', which='major')
 ax1.set_xlabel('modulation frequency (kHz)', labelpad=5)

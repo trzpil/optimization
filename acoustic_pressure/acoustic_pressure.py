@@ -85,6 +85,7 @@ class AcousticPressure():
         Gamma = self.fluid.Gamma
         # effecrive losses the 0.7 come from the result obtain for Keff in [1]
         # /! k_eff is divide by 2 in W
+        self.alpha_eff = self.gas.absorption_coeff # [m-1] update alpha if gas has been changed
         k_eff = self.alpha_eff*0.7
         # relaxation time [s]
         tau = self.gas.relaxation_time
