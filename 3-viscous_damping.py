@@ -22,15 +22,23 @@ from geometry import quartz_tuning_fork as qtf
 #################################################
 ###   PARAMs                   
 #################################################
+nbr_points = 200
+
+Width = np.linspace(1e-6,60e-6,nbr_points) #[m]
+Thickness = np.linspace(1e-7,100e-6,nbr_points) #[m]
+Gap = 4e-6 #[m]
+Freq = 15e3 #[Hz]
+
+#################################################
+###   COMPUTE                   
+#################################################
+
 start = time.time()
 
 Air = fm.Fluid(name='air')
 Si100 = fm.Material(name='silicon_100')
 
-Width = np.linspace(1e-6,60e-6,200) #[m]
-Thickness = np.linspace(1e-7,100e-6,200) #[m]
-Gap = 4e-6 #[m]
-Freq = 15e3 #[Hz]
+
 
 W, T = np.meshgrid(Width, Thickness)
 

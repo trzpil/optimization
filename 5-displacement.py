@@ -23,13 +23,13 @@ from acoustic_pressure import acoustic_pressure as ap
 ###   PARAMs                   
 #################################################
 
-nbr_points = 100
+nbr_points = 50
 
 # Define resonator parameters
 Width = np.linspace(1e-6,80e-6,nbr_points) #[m]
 Thickness = np.linspace(1e-5,150e-6,nbr_points) #[m]
 Gap = 4e-6 #[m]
-Freq = 15e3 #[Hz]
+Freq = 25e3 #[Hz]
 
 #################################################
 ###   COMPUTE                  
