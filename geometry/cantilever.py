@@ -32,8 +32,7 @@ class Cantilever(be.Beam):
         if dico['freq'] is None:
             self.freq = self.f0()
         # quality factor
-        if (self.width is not None) and (self.thickness is not None):
-            self.hydro = hf.HydrodynamicFunction(fluid,self)
+        self.hydro = None
         self.Qsup = None # Q support
         self.Qvis = None # Q viscous
         self.Qted = None # Q thermoelastic
@@ -164,6 +163,11 @@ class Cantilever(be.Beam):
         return Q
 
     def Q_viscous_sq(self):
+        if self.hydro is None :         
+            if (self.width is not None) and (self.thickness is not None):
+               self.hydro = hf.HydrodynamicFunction(self.fluid,self)
+            else:
+                raise ValueError('Beam thickess and/or width should have a value.')
         # Q viscous with squeeze film
         self.hydro.Re = self.hydro.ReynoldsNumber()
         self.hydro.Sader = self.hydro.SaderCoefficient()
@@ -176,6 +180,11 @@ class Cantilever(be.Beam):
         return self.hydro.Q
 
     def Q_viscous_nosq(self):
+        if self.hydro is None : 
+            if (self.width is not None) and (self.thickness is not None):
+                self.hydro = hf.HydrodynamicFunction(self.fluid,self)
+            else:
+                raise ValueError('Beam thickess and/or width should have a value.')
         # Q viscous without squeeze film
         self.hydro.Re = self.hydro.ReynoldsNumber()
         self.hydro.Sader = self.hydro.SaderCoefficient()

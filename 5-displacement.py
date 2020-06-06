@@ -23,24 +23,23 @@ from acoustic_pressure import acoustic_pressure as ap
 ###   PARAMs                   
 #################################################
 
-nbr_points = 50
+nbr_points = 20
 
 # Define resonator parameters
 Width = np.linspace(1e-6,80e-6,nbr_points) #[m]
 Thickness = np.linspace(1e-5,150e-6,nbr_points) #[m]
 Gap = 4e-6 #[m]
-Freq = 25e3 #[Hz]
+Freq = 10e3 #[Hz]
 
 #################################################
-###   COMPUTE                  
+###   DEFINE CLASS INSTANCE                  
 #################################################
 
-
-start = time.time()
-
+# External fluid
 Air = fm.Fluid(name='air')
 Air.info()
 
+# Targer gas
 Ch4 = fm.GasSpecie(dico={
     'name':'CH4',
     'abs wavelength [m]':1.65e-6,
@@ -51,18 +50,35 @@ Ch4 = fm.GasSpecie(dico={
     'concentration [Nbr_mlc/Nbr_tot]':0.01})
 Ch4.info()
 
+# Cantilever material
 Si100 = fm.Material(name='silicon_100')
 Si100.info()
 
-# Acoustic pressure with values from [1]
-AcPress = ap.AcousticPressure(fluid=Air,target_gas=Ch4,
+# Define cantilever
+Cant = ct.Cantilever(material=Si100,fluid=Air,dico={'name':'cant',
+        'length':None,
+        'width':None,
+        'thickness':None,
+        'gap':Gap,
+        'freq':Freq,
+        'Qvac':None})
+Cant.info()
+
+# Acoustic pressure
+AcPress = ap.AcousticPressure(fluid=Air,beam=Cant,target_gas=Ch4,
         laser={'freq_mod':Freq,
             'laser_power':10e-3,
             'wavelength':1.65e-6,
             'waist':100e-6,
-            'Rayleigh_length':None})
+            'Rayleigh_length':None,
+            'position':[0,0,150e-6]}) # Define waist position of the laser
 AcPress.info()
 
+
+#################################################
+###   COMPUTE                    
+#################################################
+start = time.time()
 
 W, T = np.meshgrid(Width, Thickness)
 
@@ -80,52 +96,16 @@ data = {'Qvis_sq':np.zeros((np.size(W,0),np.size(W,1))),
         'W':np.zeros((np.size(W,0),np.size(W,1))),
         'Force':np.zeros((np.size(W,0),np.size(W,1)))}
 
-#################################################
-###   FUNCTIONs                   
-#################################################
 
 def Compute_cant(w,t):
     # w the width
     # t the thickness
     dico = {}
-    Cant = ct.Cantilever(material=Si100,fluid=Air,dico={'name':'cant',
-            'length':None,
-            'width':w,
-            'thickness':t,
-            'gap':Gap,
-            'freq':Freq,
-            'Qvac':None})
+    Cant.width = w
+    Cant.thickness = t
     Cant.length_unkonw()
 
-    # Define waist position of the laser
-    xL = 0.725*Cant.length # [m] value obtain from plot_beam_position.py
-    yL = 0 # [m]
-    zL = 150e-6 # [m]
-
-    # Cantilver shape mode use for the acoustic force
-    def phi(x):
-        # return shape of the cantilever
-        # with normalization with Phi_max =1
-        # for the first mode phi is max for x=L 
-        # where L is the length of the cantilever
-        return Cant.phi(x)/Cant.phi(Cant.length)
-
-    # Pressure appplied on the cnatilever
-    def DeltaP_parallel(x,y):
-        # return the difference of pressure 
-        # beteween the top and back of the mechanicla resoantor
-        # when the laser beam is parallel to the length of the cantilever
-        time = 0
-        a = x-xL
-        b = y-yL
-        c = zL
-        P1 = np.abs(AcPress.P(a,b,c,time))
-        P2 = np.abs(AcPress.P(a,b,c+Cant.thickness,time))
-        return P1-P2
-
-    # Force on the cantilever
-    def Force_density_parallel(x,y):
-        return DeltaP_parallel(x,y)*phi(x)
+    AcPress.xL = 0.725*Cant.length # [m] value obtain from plot_beam_position.py
 
     # Fill the dictionary
     dico['Qvis_sq'] = Cant.Q_viscous_sq()
@@ -140,7 +120,7 @@ def Compute_cant(w,t):
     # dico['Mass_eff'] = Cant.effective_mass()
     dico['Xi'] = Cant.Xi0()
     # dico['XiS'] = dico['Xi']*dico['Surface']
-    dico['Force'], _ = dblquad(Force_density_parallel, -Cant.width/2, Cant.width/2, lambda toto: 0, lambda toto: Cant.length)
+    dico['Force'] = AcPress.Force()
     dico['W'] = dico['Xi']*dico['Force']
     return dico
 

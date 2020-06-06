@@ -17,6 +17,7 @@ see also pdf and matlab file from her student
 
 from scipy.special import j0, y0 # zeroth-order Bessel functions of the first and second kinds
 from scipy.integrate import quad # integration 
+from scipy.integrate import dblquad  # for double integration
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
@@ -33,15 +34,21 @@ from fluid_material import fluid_material as fm
 
 class AcousticPressure():
     # define a class wich can return the acoustic pressure
-    def __init__(self,fluid,target_gas,laser):
+    def __init__(self,fluid,target_gas,laser,beam=None):
         self.gas = target_gas 
         self.fluid = fluid
+        # beam or cantilever
+        self.beam = beam
         # modualtion frequency
         self.freq_mod = laser['freq_mod'] #[Hz]        
         # laser power
         self.Pl = laser['laser_power'] #[W]
         # laser wavelength
         self.wavelength = laser['wavelength'] # [m]
+        # laser position 
+        if laser['position'] is not None:
+
+            self.xL, self.yL, self.zL = laser['position']
         # laser waist (minimum value possible)
         # if we compare with [1] sigma = waist/2
         if laser['waist'] is None:
@@ -62,6 +69,45 @@ class AcousticPressure():
         self.waist = value
         # laser Rayleigh length
         self.Rayleigh = np.pi*self.waist**2/self.wavelength 
+
+    def Force(self):
+        # estimate the acoustic force applied on the resonator "beam"
+
+        # Define waist position of the laser
+        xL = self.xL
+        yL = self.yL
+        zL = self.zL
+        Cant = self.beam
+
+        # Cantilver shape mode use for the acoustic force
+        def phi(x):
+            # return shape of the cantilever
+            # with normalization with Phi_max =1
+            # for the first mode phi is max for x=L 
+            # where L is the length of the cantilever
+            return Cant.phi(x)/Cant.phi(Cant.length)
+
+        # Pressure appplied on the cnatilever
+        def DeltaP_parallel(x,y):
+            # return the difference of pressure 
+            # beteween the top and back of the mechanicla resoantor
+            # when the laser beam is parallel to the length of the cantilever
+            time = 0
+            a = x-xL
+            b = y-yL
+            c = zL
+            P1 = np.abs(self.P(a,b,c,time))
+            P2 = np.abs(self.P(a,b,c+Cant.thickness,time))
+            return P1-P2
+
+        # Force on the cantilever
+        def Force_density_parallel(x,y):
+            return DeltaP_parallel(x,y)*phi(x)
+
+        F, _ = dblquad(Force_density_parallel, -Cant.width/2, Cant.width/2,
+          lambda toto: 0, lambda toto: Cant.length)
+
+        return F        
 
     def P(self,x,y,z,t):
         '''
@@ -113,8 +159,10 @@ class AcousticPressure():
         print('waist            = %f um'%(self.waist*1e6))
         if self.freq_mod is not None:
             print('modulation       = %f kHz'%(self.freq_mod*1e-3))
+        print('\n')
         print('GAS   :')
         print("losses           = %f cm-1"%(self.alpha_eff*1e-2))
+        print('\n')
 
 
 if __name__ == "__main__":
@@ -137,12 +185,13 @@ if __name__ == "__main__":
     Ch4.relaxation_time = 1e-9
     Ch4.info()
 
-    AcPress = AcousticPressure(fluid=Air,target_gas=Ch4,
+    AcPress = AcousticPressure(fluid=Air,target_gas=Ch4,beam=None,
             laser={'freq_mod':32.8e3,
                 'laser_power':61.7e-3,
                 'wavelength':1.53e-6,
                 'waist':100e-6,
-                'Rayleigh_length':None})
+                'Rayleigh_length':None,
+                'position':None})
     AcPress.info()
 
     Pressure = []

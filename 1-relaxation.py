@@ -35,7 +35,8 @@ AcPress = ap.AcousticPressure(fluid=Air,target_gas=Ch4,
             'laser_power':10e-3,
             'wavelength':1.65e-6,
             'waist':100e-6,
-            'Rayleigh_length':None})
+            'Rayleigh_length':None,
+            'position':None})
 AcPress.info()
 
 zL = 150e-6 # [m] distance between laser beam and resonator
