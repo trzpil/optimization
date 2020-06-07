@@ -17,19 +17,20 @@ print ("file name :",titre)
 
 from fluid_material import fluid_material as fm
 from geometry import cantilever as ct
-from acoustic_pressure import acoustic_pressure as ap 
+from acoustic_pressure import acoustic_pressure as ap
+from transduction import capacitance as cp 
 
 #################################################
 ###   PARAMs                   
 #################################################
 
-nbr_points = 20
+nbr_points = 50
 
 # Define resonator parameters
 Width = np.linspace(1e-6,80e-6,nbr_points) #[m]
 Thickness = np.linspace(1e-5,150e-6,nbr_points) #[m]
 Gap = 4e-6 #[m]
-Freq = 10e3 #[Hz]
+Freq = 15e3 #[Hz]
 
 #################################################
 ###   DEFINE CLASS INSTANCE                  
@@ -74,6 +75,8 @@ AcPress = ap.AcousticPressure(fluid=Air,beam=Cant,target_gas=Ch4,
             'position':[0,0,150e-6]}) # Define waist position of the laser
 AcPress.info()
 
+# Capacitance
+Capa = cp.Capacitance(cantilever=Cant, acoustic=AcPress, Vdc=1)
 
 #################################################
 ###   COMPUTE                    
@@ -82,19 +85,25 @@ start = time.time()
 
 W, T = np.meshgrid(Width, Thickness)
 
-data = {'Qvis_sq':np.zeros((np.size(W,0),np.size(W,1))), 
+data = {'Thickness':np.zeros((np.size(W,0),np.size(W,1))),
+        'Width':np.zeros((np.size(W,0),np.size(W,1))),
+        'Qvis_sq':np.zeros((np.size(W,0),np.size(W,1))), # Q viscous with squeeez film 
+        'Qvis_nosq':np.zeros((np.size(W,0),np.size(W,1))), # Q viscous without squeeze film
         'Qsup':np.zeros((np.size(W,0),np.size(W,1))), 
         'Qted':np.zeros((np.size(W,0),np.size(W,1))), 
         'Qaco':np.zeros((np.size(W,0),np.size(W,1))), 
         'Qtot':np.zeros((np.size(W,0),np.size(W,1))), 
+        'Qtot_nosq':np.zeros((np.size(W,0),np.size(W,1))),  # Qtotal without squeeze film
         'Length':np.zeros((np.size(W,0),np.size(W,1))),
-        'Freq':np.zeros((np.size(W,0),np.size(W,1))), 
+        'Freq':np.zeros((np.size(W,0),np.size(W,1))), #resonnance frequency
         'Surface':np.zeros((np.size(W,0),np.size(W,1))), 
-        'Mass_eff':np.zeros((np.size(W,0),np.size(W,1))), 
-        'Xi':np.zeros((np.size(W,0),np.size(W,1))), 
-        'XiS':np.zeros((np.size(W,0),np.size(W,1))),
-        'W':np.zeros((np.size(W,0),np.size(W,1))),
-        'Force':np.zeros((np.size(W,0),np.size(W,1)))}
+        'Mass_eff':np.zeros((np.size(W,0),np.size(W,1))), #effective mass
+        'Xi':np.zeros((np.size(W,0),np.size(W,1))), # susceptibility
+        'XiS':np.zeros((np.size(W,0),np.size(W,1))), 
+        'W':np.zeros((np.size(W,0),np.size(W,1))), # displacement
+        'Force':np.zeros((np.size(W,0),np.size(W,1))), # photo-acoustic force
+        'C0':np.zeros((np.size(W,0),np.size(W,1))), # capacitance without any force
+        'dVout':np.zeros((np.size(W,0),np.size(W,1)))} # amplitude of the output tension
 
 
 def Compute_cant(w,t):
@@ -108,20 +117,26 @@ def Compute_cant(w,t):
     AcPress.xL = 0.725*Cant.length # [m] value obtain from plot_beam_position.py
 
     # Fill the dictionary
-    dico['Qvis_sq'] = Cant.Q_viscous_sq()
+    dico['Thickness'] = Cant.thickness
+    dico['Width'] = Cant.width
+    dico['Qvis_sq'] = Cant.Q_viscous_sq() 
+    dico['Qvis_nosq'] = Cant.Q_viscous_nosq() # Q viscous without squeeze film
     dico['Qsup'] = Cant.Q_support()
     dico['Qted'] = Cant.Q_thermoelastic()
     dico['Qaco'] = Cant.Q_acoustic()
     Cant.Qtot = (1/dico['Qvis_sq'] + 1/dico['Qsup'] + 1/dico['Qted'] + 1/dico['Qaco'])**(-1)
     dico['Qtot'] = Cant.Qtot
+    # dico['Qtot_nosq'] = (1/dico['Qvis_nosq'] + 1/dico['Qsup'] + 1/dico['Qted'] + 1/dico['Qaco'])**(-1)
     # dico['Length'] = Cant.length
     # dico['Freq'] = Cant.f0()
-    dico['Surface'] = Cant.surface()
+    # dico['Surface'] = Cant.surface()
     # dico['Mass_eff'] = Cant.effective_mass()
-    dico['Xi'] = Cant.Xi0()
+    # dico['Xi'] = Cant.Xi0()
     # dico['XiS'] = dico['Xi']*dico['Surface']
-    dico['Force'] = AcPress.Force()
-    dico['W'] = dico['Xi']*dico['Force']
+    # dico['Force'] = AcPress.Force()
+    # dico['W'] = dico['Xi']*dico['Force']
+    dico['C0'] = Capa.Czero()
+    dico['dVout'] = Capa.dVout()
     return dico
 
 
@@ -135,7 +150,6 @@ end = time.time()
 print('TIMER :')
 info_time = 'exec_time=%.0fs =%.0fmin'%((end-start),(end-start)/60)
 print(info_time) 
-
 
 #################################################
 ###   PLOT DATA                               
@@ -172,7 +186,7 @@ params = {'legend.fontsize': 16,
 mpl.rcParams.update(params)
 
 
-cmap = 'Oranges'
+cmap = 'Greens'
 
 nbr_lvl = 25 # nrb of level for le colorbar
 
@@ -180,9 +194,9 @@ gridsize = (1, 1)
 fig, _ = plt.subplots()
 
 ax1 = plt.subplot2grid(gridsize, (0, 0), colspan=1, rowspan=1)
-cs1 = ax1.contourf(T*1e6, W*1e6, data['W']*1e12, cmap=cmap, levels = nbr_lvl)
+cs1 = ax1.contourf(T*1e6, W*1e6, data['dVout']*1e6, cmap=cmap, levels = nbr_lvl)
 ax1.contour(cs1, colors='k')
-ax1.set_title(r'W(x) displacement (pm) for f=%.1f kHz'%(Freq*1e-3))
+ax1.set_title(r'V$_{out}$ amplitude ($\mu$V) for f=%.0f kHz'%(Freq*1e-3))
 ax1.set_ylabel('width (um)', labelpad=0)
 ax1.set_xlabel('thickness (um)', labelpad=0)
 # ax1.set_xscale('log')
@@ -193,6 +207,6 @@ for t in cb.ax.get_yticklabels():
 
 
 # save figure
-fig.savefig(titre+'_{:.0f}kHz.png'.format(Freq*1e-3))
+fig.savefig(titre+'_{:.0f}kHz_{:.0f}um.png'.format(Freq*1e-3,Cant.gap*1e6))
 
 plt.show()

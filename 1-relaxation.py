@@ -11,7 +11,7 @@ import sys
 
 # liste des repertoires ou se trouvent les fichiers
 path = os.getcwd()
-titre = sys.argv[0].replace('PV2I-',"").replace(".py","").replace(path+"/","")
+titre = sys.argv[0].replace(".py","").replace(path+"/","")
 print ("file name :",titre)
 
 from fluid_material import fluid_material as fm
