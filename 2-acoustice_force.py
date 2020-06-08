@@ -29,12 +29,23 @@ from geometry import cantilever as ct
 from acoustic_pressure import acoustic_pressure as ap
 
 #################################################
-###   Calculation                  
+###   Parameters                 
+#################################################
+freq = 10e3 # resonance frequency [Hz]
+
+nbr_points = 20
+width_list = np.linspace(5e-6,800e-6,nbr_points)
+thickness_list = np.linspace(5e-6,200e-6,nbr_points)
+
+#################################################
+###   Define instance of class                   
 #################################################
 
-# Define fluid and material
+# Define fluid  
 Air = fm.Fluid(name='air')
+Air.info()
 
+# Define target gas
 Ch4 = fm.GasSpecie(dico={
     'name':'CH4',
     'abs wavelength [m]':1.65e-6,
@@ -45,69 +56,29 @@ Ch4 = fm.GasSpecie(dico={
     'concentration [Nbr_mlc/Nbr_tot]':0.01})
 Ch4.info()
 
+# Define fluid and material 
 Si100 = fm.Material(name='silicon_100')
+Si100.info()
 
 # Define cantilever
-e = 100e-6 # thickness [m]
-l =  500e-6 # width [m]
-freq = 15e3 # resonance frequency [Hz]
 Cant = ct.Cantilever(material=Si100,fluid=Air,dico={'name':'cantilever',
             'length':None,
-            'width':l,
-            'thickness':e,
+            'width':None,
+            'thickness':None,
             'gap':None,
             'freq':freq,
             'Qvac':None})
-Cant.length_unkonw()
-print('Cantilever length is : %f mm'%(Cant.length*1e3))
 Cant.info()
 
-
-
-
-'''
-Axis definition :
-X is along the length of the cantilever
-Y is along the width of the cantilever
-Z is along the thickness of the cantilever
-'''
-
-# Define waist position of the laser
-xL = 0.725*Cant.length # [m] value obtain from plot_beam_position.py
-yL = 0 # [m]
-zL = 150e-6 # [m]
-
 # Acoustic pressure with values from [1]
-AcPress = ap.AcousticPressure(fluid=Air,target_gas=Ch4,
+AcPress = ap.AcousticPressure(fluid=Air,target_gas=Ch4,beam=Cant,
         laser={'freq_mod':Cant.freq,
             'laser_power':10e-3,
             'wavelength':1.65e-6,
             'waist':100e-6,
             'Rayleigh_length':None,
-            'position':[xL,yL,zL]})
+            'position':None})
 AcPress.info()
-
-def phi(x):
-    # return shape of the cantilever
-    # with normalization with Phi_max =1
-    # for the first mode phi is max for x=L 
-    # where L is the length of the cantilever
-    return Cant.phi(x)/Cant.phi(Cant.length)
-
-def DeltaP_parallel(x,y):
-    # return the difference of pressure 
-    # beteween the top and back of the mechanicla resoantor
-    # when the laser beam is parallel to the length of the cantilever
-    time = 0
-    a = x-xL
-    b = y-yL
-    c = zL
-    P1 = np.abs(AcPress.P(a,b,c,time))
-    P2 = np.abs(AcPress.P(a,b,c+Cant.thickness,time))
-    return P1-P2
-
-def Force_density_parallel(x,y):
-    return DeltaP_parallel(x,y)*phi(x)
 
 
 #################################################
@@ -116,9 +87,6 @@ def Force_density_parallel(x,y):
 
 start = time.time()
 
-nbr_points = 20
-width_list = np.linspace(5e-6,800e-6,nbr_points)
-thickness_list = np.linspace(5e-6,200e-6,nbr_points)
 width_grid, thickness_grid = np.meshgrid(width_list, thickness_list)
 
 data_plot = np.zeros((np.size(width_grid,0),np.size(width_grid,1)))
@@ -131,7 +99,12 @@ for i in range(0,np.size(width_grid,0)):
         Cant.width = width
         Cant.thickness = thickness
         Cant.length_unkonw()
-        force, _ = dblquad(Force_density_parallel, -Cant.width/2, Cant.width/2, lambda toto: 0, lambda toto: Cant.length)
+        # Define waist position of the laser
+        xL = 0.725*Cant.length # [m] value obtain from plot_beam_position.py
+        yL = 0 # [m]
+        zL = 150e-6 # [m]
+        AcPress.xL, AcPress.yL, AcPress.zL = [xL,yL,zL]
+        force = AcPress.Force()
         data_plot[i][j] = force
         data_save['width [m]'].append(width)
         data_save['thickness [m]'].append(thickness)
@@ -184,22 +157,14 @@ nbr_lvl = 25 # nrb of level for le colorbar
 
 gridsize = (1, 1)
 fig, _ = plt.subplots()
-# fig.suptitle('Acoustic force (pN)')
 
 ax1 = plt.subplot2grid(gridsize, (0, 0), colspan=1, rowspan=1)
 cs1 = ax1.contourf(thickness_grid*1e6, width_grid*1e6, data_plot*1e12, cmap=cmap, levels = nbr_lvl)
 ax1.contour(cs1, colors='k')
-ax1.set_title(r'acoustic force (pN) for f=%.1f kHz'%(AcPress.freq_mod*1e-3))
+ax1.set_title(r'acoustic force (pN) for f=%.0f kHz'%(AcPress.freq_mod*1e-3))
 ax1.set_ylabel('width (um)', labelpad=0)
 ax1.set_xlabel('thickness (um)', labelpad=0)
-# ax1.grid(c='k', ls='-', alpha=0.3)
-# ax1.set_xscale('log')
-# ax1.set_yscale('log')
-# ax1.tick_params(axis='both', which='major', labelsize=20)
-# ax1.tick_params(axis='both', which='minor', labelsize=18)
 
-#plt.colorbar(cs1, ax=ax1)
-# increase color bat font size
 cb = plt.colorbar(cs1, ax=ax1) # grab the Colorbar instance
 for t in cb.ax.get_yticklabels():
      t.set_fontsize(18)

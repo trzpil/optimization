@@ -47,7 +47,6 @@ class AcousticPressure():
         self.wavelength = laser['wavelength'] # [m]
         # laser position 
         if laser['position'] is not None:
-
             self.xL, self.yL, self.zL = laser['position']
         # laser waist (minimum value possible)
         # if we compare with [1] sigma = waist/2
